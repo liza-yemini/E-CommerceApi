@@ -1,15 +1,17 @@
 ﻿using Microsoft.Extensions.Options;
+using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
 using VattaAppApi.Models;
 using VattaAppApi.Models.DbSettings;
+using VattaAppApi.Services.Interfaces;
 
 namespace VattaAppApi.Services;
 
-public class SellersService
+public class MongoSellersService: ISellersService
 {
     private readonly IMongoCollection<Seller> _sellersCollection;
 
-    public SellersService(IOptions<SellersDbSettings> sellersDbSettings)
+    public MongoSellersService(IOptions<SellersDbSettings> sellersDbSettings)
     {
         var mongoClient = new MongoClient(
             sellersDbSettings.Value.ConnectionString);
@@ -21,18 +23,27 @@ public class SellersService
             sellersDbSettings.Value.SellersCollectionName);
     }
 
-    public async Task<List<Seller>> GetAsync() =>
+    public async Task<List<Seller>> Get() =>
         await _sellersCollection.Find(_ => true).ToListAsync();
 
-    public async Task<Seller?> GetAsync(string id) =>
+    public async Task<Seller?> Get(string id) =>
         await _sellersCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
-    public async Task CreateAsync(Seller newSeller) =>
+    public async Task Create(Seller newSeller)
+    {
+        newSeller.Password = BCrypt.Net.BCrypt.HashPassword(newSeller.Password);
         await _sellersCollection.InsertOneAsync(newSeller);
+    }
 
-    public async Task UpdateAsync(string id, Seller updateSeller) =>
+    public async Task Update(string id, Seller updateSeller) =>
         await _sellersCollection.ReplaceOneAsync(x => x.Id == id, updateSeller);
 
-    public async Task RemoveAsync(string id) =>
+    public async Task Remove(string id) =>
         await _sellersCollection.DeleteOneAsync(x => x.Id == id);
+
+    public async Task Login(string id, string password)
+    {
+        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+        await _sellersCollection.Find(x => x.Id == id && x.Password == hashedPassword).CountDocumentsAsync();
+    }
 }

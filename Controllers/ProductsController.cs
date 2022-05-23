@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Reflection.Metadata;
+using Microsoft.AspNetCore.Mvc;
 using VattaAppApi.Models;
 using VattaAppApi.Services;
 
@@ -8,21 +9,21 @@ namespace VattaAppApi.Controllers
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly ProductsService _productsService;
+        private readonly MongoProductsService _mongoProductsService;
 
-        public ProductsController(ProductsService productsService)
+        public ProductsController(MongoProductsService mongoProductsService)
         {
-            _productsService = productsService;
+            _mongoProductsService = mongoProductsService;
         }
 
         [HttpGet]
         public async Task<List<Product>> Get() =>
-            await _productsService.GetAsync();
+            await _mongoProductsService.Get();
 
         [HttpGet("{id:length(24)}")]
         public async Task<ActionResult<Product>> Get(string id)
         {
-            var product = await _productsService.GetAsync(id);
+            var product = await _mongoProductsService.Get(id);
 
             if (product is null)
             {
@@ -32,27 +33,31 @@ namespace VattaAppApi.Controllers
             return product;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody]Product newProduct)
-        {
-            await _productsService.CreateAsync(newProduct);
+        [HttpGet("category/{category}")]
+        public async Task<List<Product>> GetByCategory(string category) =>
+            await _mongoProductsService.GetByCategory(category);
 
-            return CreatedAtAction(nameof(Get), new { id = newProduct.Id }, newProduct);
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody]Product newOrderedProduct)
+        {
+            await _mongoProductsService.Create(newOrderedProduct);
+
+            return CreatedAtAction(nameof(Get), new { id = newOrderedProduct.Id }, newOrderedProduct);
         }
 
         [HttpPut("{id:length(24)}")]
-        public async Task<IActionResult> Update(string id, Product updateProduct)
+        public async Task<IActionResult> Update(string id, Product updateOrderedProduct)
         {
-            var product = await _productsService.GetAsync(id);
+            var product = await _mongoProductsService.Get(id);
 
             if (product is null)
             {
                 return NotFound();
             }
 
-            updateProduct.Id = product.Id;
+            updateOrderedProduct.Id = product.Id;
 
-            await _productsService.UpdateAsync(id, updateProduct);
+            await _mongoProductsService.Update(id, updateOrderedProduct);
 
             return NoContent();
         }
@@ -60,19 +65,16 @@ namespace VattaAppApi.Controllers
         [HttpDelete("{id:length(24)}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var product = await _productsService.GetAsync(id);
+            var product = await _mongoProductsService.Get(id);
 
             if (product is null)
             {
                 return NotFound();
             }
 
-            await _productsService.RemoveAsync(id);
+            await _mongoProductsService.Remove(id);
 
             return NoContent();
         }
-
-
-
     }
 }

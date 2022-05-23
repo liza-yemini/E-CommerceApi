@@ -15,7 +15,7 @@ public class Product
     public double Price { get; set; }
     public double OriginalPrice { get; set; }
     public string Description { get; set; }
-    public string CategoryId { get; set; }
+    public string[] CategoriesIds { get; set; }
     public string Brand { get; set; }
     public string ModelNumber { get; set; }
     public string ItemWeight { get; set; }
@@ -26,11 +26,12 @@ public class Product
     public DateTime CreatedDate { get; set; } = DateTime.Now;
     public DateTime LastUpdatedDate { get; set; }
     public DateTime DeletedDate { get; set; } = new DateTime();
-    public bool Sold { get; set; } = false;
     public string BuyerId { get; set; }
     public string[] LoggedInWatchersIds { get; set; }
     public int ViewsCount { get; set; }
-    public string ShippingType { get; set; }
-    public string PickingAddress { get; set; }
+    public string[] ShippingTypes { get; set; }
+    public string ShippingPrice { get; set; }
+    public Address PickupAddress { get; set; }
+    public bool Sold { get; set; } = false;
 
 }

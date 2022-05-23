@@ -8,7 +8,7 @@ builder.Services.Configure<CartsDbSettings>(
     builder.Configuration.GetSection("CartsDb"));
 builder.Services.Configure<CategoriesDbSettings>(
     builder.Configuration.GetSection("CategoriesDb"));
-builder.Services.Configure<ClientsDbSettings>(
+builder.Services.Configure<BuyersDbSettings>(
     builder.Configuration.GetSection("ClientsDb"));
 builder.Services.Configure<OrdersDbSettings>(
     builder.Configuration.GetSection("OrdersDb"));
@@ -22,12 +22,12 @@ builder.Services.AddControllers
     AddJsonOptions(options => 
         options.JsonSerializerOptions.PropertyNamingPolicy = null);
 
-builder.Services.AddSingleton<CartsService>();
-builder.Services.AddSingleton<CategoriesService>();
-builder.Services.AddSingleton<ClientsService>();
-builder.Services.AddSingleton<OrdersService>();
-builder.Services.AddSingleton<ProductsService>();
-builder.Services.AddSingleton<SellersService>();
+builder.Services.AddSingleton<MongoCartsService>();
+builder.Services.AddSingleton<MongoCategoriesService>();
+builder.Services.AddSingleton<MongoBuyersService>();
+builder.Services.AddSingleton<MongoOrdersService>();
+builder.Services.AddSingleton<MongoProductsService>();
+builder.Services.AddSingleton<MongoSellersService>();
 
 
 var app = builder.Build();
