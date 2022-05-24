@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VattaAppApi.Models;
 using VattaAppApi.Services;
+using VattaAppApi.Services.Interfaces;
 
 namespace VattaAppApi.Controllers
 {
@@ -8,21 +9,21 @@ namespace VattaAppApi.Controllers
     [Route("api/[controller]")]
     public class CategoriesController : ControllerBase
     {
-        private readonly MongoCategoriesService _mongoCategoriesService;
+        private readonly ICategoriesService _categoriesService;
 
-        public CategoriesController(MongoCategoriesService mongoCategoriesService)
+        public CategoriesController(ICategoriesService categoriesService)
         {
-            _mongoCategoriesService = mongoCategoriesService;
+            _categoriesService = categoriesService;
         }
 
         [HttpGet]
         public async Task<List<Category>> Get() =>
-            await _mongoCategoriesService.Get();
+            await _categoriesService.Get();
 
         [HttpGet("{id:length(24)}")]
         public async Task<ActionResult<Category>> Get(string id)
         {
-            var category = await _mongoCategoriesService.Get(id);
+            var category = await _categoriesService.Get(id);
 
             if (category is null)
             {
@@ -35,7 +36,7 @@ namespace VattaAppApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Category newCategory)
         {
-            await _mongoCategoriesService.Create(newCategory);
+            await _categoriesService.Create(newCategory);
 
             return CreatedAtAction(nameof(Get), new { id = newCategory.Id }, newCategory);
         }
@@ -43,7 +44,7 @@ namespace VattaAppApi.Controllers
         [HttpPut("{id:length(24)}")]
         public async Task<IActionResult> Update(string id, Category updateCategory)
         {
-            var category = await _mongoCategoriesService.Get(id);
+            var category = await _categoriesService.Get(id);
 
             if (category is null)
             {
@@ -52,7 +53,7 @@ namespace VattaAppApi.Controllers
 
             updateCategory.Id = category.Id;
 
-            await _mongoCategoriesService.Update(id, updateCategory);
+            await _categoriesService.Update(id, updateCategory);
 
             return NoContent();
         }
@@ -60,14 +61,14 @@ namespace VattaAppApi.Controllers
         [HttpDelete("{id:length(24)}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var category = await _mongoCategoriesService.Get(id);
+            var category = await _categoriesService.Get(id);
 
             if (category is null)
             {
                 return NotFound();
             }
 
-            await _mongoCategoriesService.Remove(id);
+            await _categoriesService.Remove(id);
 
             return NoContent();
         }

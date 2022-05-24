@@ -2,15 +2,15 @@
 
 namespace VattaAppApi.Services.Interfaces;
 
-public interface IBuyersService
+public interface ICustomersService
 {
     //Get all
-    public Task<List<Buyer>> Get();
+    public Task<List<Customer>> Get();
     //Get one by id
-    public Task<Buyer?> Get(string id);
+    public Task<Customer?> Get(string id);
     //Update by id
-    public Task Update(string id, Buyer updateBuyer);
-    public Task Create(Buyer newBuyer);
+    public Task Update(string id, Customer updateCustomer);
+    public Task Create(Customer newCustomer);
     public Task Remove(string id);
     public Task Login(string username, string password);
 

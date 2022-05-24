@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VattaAppApi.Models;
 using VattaAppApi.Services;
+using VattaAppApi.Services.Interfaces;
 
 namespace VattaAppApi.Controllers;
 
@@ -10,21 +11,21 @@ public class OrderedProductsController : Controller
     [Route("api/[controller]")]
     public class OrdersController : ControllerBase
     {
-        private readonly MongoOrderedProductsService _mongoOrderedProductsService;
+        private readonly IOrderedProductService _orderedProductsService;
 
-        public OrdersController(MongoOrderedProductsService mongoOrderedProductsService)
+        public OrdersController(IOrderedProductService orderedProductsService)
         {
-            _mongoOrderedProductsService = mongoOrderedProductsService;
+            _orderedProductsService = orderedProductsService;
         }
 
         [HttpGet]
         public async Task<List<OrderedProduct>> Get() =>
-            await _mongoOrderedProductsService.Get();
+            await _orderedProductsService.Get();
 
         [HttpGet("{id:length(24)}")]
         public async Task<ActionResult<OrderedProduct>> Get(string id)
         {
-            var product = await _mongoOrderedProductsService.Get(id);
+            var product = await _orderedProductsService.Get(id);
 
             if (product is null)
             {
@@ -37,7 +38,7 @@ public class OrderedProductsController : Controller
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] OrderedProduct newOrderedProduct)
         {
-            await _mongoOrderedProductsService.Create(newOrderedProduct);
+            await _orderedProductsService.Create(newOrderedProduct);
 
             return CreatedAtAction(nameof(Get), new { id = newOrderedProduct.Id }, newOrderedProduct);
         }
@@ -45,7 +46,7 @@ public class OrderedProductsController : Controller
         [HttpPut("{id:length(24)}")]
         public async Task<IActionResult> Update(string id, OrderedProduct updateOrderedProduct)
         {
-            var product = await _mongoOrderedProductsService.Get(id);
+            var product = await _orderedProductsService.Get(id);
 
             if (product is null)
             {
@@ -54,7 +55,7 @@ public class OrderedProductsController : Controller
 
             updateOrderedProduct.Id = product.Id;
 
-            await _mongoOrderedProductsService.Update(id, updateOrderedProduct);
+            await _orderedProductsService.Update(id, updateOrderedProduct);
 
             return NoContent();
         }
@@ -62,14 +63,14 @@ public class OrderedProductsController : Controller
         [HttpDelete("{id:length(24)}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var product = await _mongoOrderedProductsService.Get(id);
+            var product = await _orderedProductsService.Get(id);
 
             if (product is null)
             {
                 return NotFound();
             }
 
-            await _mongoOrderedProductsService.Remove(id);
+            await _orderedProductsService.Remove(id);
 
             return NoContent();
         }

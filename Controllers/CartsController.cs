@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VattaAppApi.Models;
 using VattaAppApi.Services;
+using VattaAppApi.Services.Interfaces;
 
 namespace VattaAppApi.Controllers
 {
@@ -8,21 +9,21 @@ namespace VattaAppApi.Controllers
     [Route("api/[controller]")]
     public class CartsController : ControllerBase
     {
-        private readonly MongoCartsService _mongoCartsService;
+        private readonly ICartsService _cartsService;
 
-        public CartsController(MongoCartsService mongoCartsService)
+        public CartsController(ICartsService cartsService)
         {
-            _mongoCartsService = mongoCartsService;
+            _cartsService = cartsService;
         }
 
         [HttpGet]
         public async Task<List<Cart>> Get() =>
-            await _mongoCartsService.Get();
+            await _cartsService.Get();
 
         [HttpGet("{id:length(24)}")]
         public async Task<ActionResult<Cart>> Get(string id)
         {
-            var cart = await _mongoCartsService.Get(id);
+            var cart = await _cartsService.Get(id);
 
             if (cart is null)
             {
@@ -35,7 +36,7 @@ namespace VattaAppApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Cart newCart)
         {
-            await _mongoCartsService.Create(newCart);
+            await _cartsService.Create(newCart);
 
             return CreatedAtAction(nameof(Get), new { id = newCart.Id }, newCart);
         }
@@ -43,7 +44,7 @@ namespace VattaAppApi.Controllers
         [HttpPut("{id:length(24)}")]
         public async Task<IActionResult> Update(string id, Cart updateCart)
         {
-            var cart = await _mongoCartsService.Get(id);
+            var cart = await _cartsService.Get(id);
 
             if (cart is null)
             {
@@ -52,7 +53,7 @@ namespace VattaAppApi.Controllers
 
             updateCart.Id = cart.Id;
 
-            await _mongoCartsService.Update(id, updateCart);
+            await _cartsService.Update(id, updateCart);
 
             return NoContent();
         }
@@ -60,14 +61,14 @@ namespace VattaAppApi.Controllers
         [HttpDelete("{id:length(24)}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var cart = await _mongoCartsService.Get(id);
+            var cart = await _cartsService.Get(id);
 
             if (cart is null)
             {
                 return NotFound();
             }
 
-            await _mongoCartsService.Remove(id);
+            await _cartsService.Remove(id);
 
             return NoContent();
         }

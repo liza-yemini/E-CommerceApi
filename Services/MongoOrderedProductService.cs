@@ -2,14 +2,15 @@
 using MongoDB.Driver;
 using VattaAppApi.Models;
 using VattaAppApi.Models.DbSettings;
+using VattaAppApi.Services.Interfaces;
 
 namespace VattaAppApi.Services;
 
-public class MongoOrderedProductsService
+public class MongoOrderedProductService: IOrderedProductService
 {
-    private readonly IMongoCollection<OrderedProduct> _orderedProdcutsCollection;
+    private readonly IMongoCollection<OrderedProduct> _orderedProductsCollection;
 
-    public MongoOrderedProductsService(IOptions<ProductsDbSettings> productsDbSettings)
+    public MongoOrderedProductService(IOptions<ProductsDbSettings> productsDbSettings)
     {
         var mongoClient = new MongoClient(
             productsDbSettings.Value.ConnectionString);
@@ -17,22 +18,22 @@ public class MongoOrderedProductsService
         var mongoDatabase = mongoClient.GetDatabase(
             productsDbSettings.Value.DbName);
 
-        _orderedProdcutsCollection = mongoDatabase.GetCollection<OrderedProduct>(
+        _orderedProductsCollection = mongoDatabase.GetCollection<OrderedProduct>(
             productsDbSettings.Value.OrderedProductsCollectionName);
     }
 
     public async Task<List<OrderedProduct>> Get() =>
-        await _orderedProdcutsCollection.Find(_ => true).ToListAsync();
+        await _orderedProductsCollection.Find(_ => true).ToListAsync();
 
     public async Task<OrderedProduct?> Get(string id) =>
-        await _orderedProdcutsCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+        await _orderedProductsCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
     public async Task Create(OrderedProduct newOrderedProduct) =>
-        await _orderedProdcutsCollection.InsertOneAsync(newOrderedProduct);
+        await _orderedProductsCollection.InsertOneAsync(newOrderedProduct);
 
     public async Task Update(string id, OrderedProduct updateOrderedProduct) =>
-        await _orderedProdcutsCollection.ReplaceOneAsync(x => x.Id == id, updateOrderedProduct);
+        await _orderedProductsCollection.ReplaceOneAsync(x => x.Id == id, updateOrderedProduct);
 
     public async Task Remove(string id) =>
-        await _orderedProdcutsCollection.DeleteOneAsync(x => x.Id == id);
+        await _orderedProductsCollection.DeleteOneAsync(x => x.Id == id);
 }

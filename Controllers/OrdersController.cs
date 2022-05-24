@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VattaAppApi.Models;
 using VattaAppApi.Services;
+using VattaAppApi.Services.Interfaces;
 
 namespace VattaAppApi.Controllers
 {
@@ -8,21 +9,21 @@ namespace VattaAppApi.Controllers
     [Route("api/[controller]")]
     public class OrdersController : ControllerBase
     {
-        private readonly MongoOrdersService _mongoOrdersService;
+        private readonly IOrdersService _ordersService;
 
-        public OrdersController(MongoOrdersService mongoOrdersService)
+        public OrdersController(IOrdersService ordersService)
         {
-            _mongoOrdersService = mongoOrdersService;
+            _ordersService = ordersService;
         }
 
         [HttpGet]
         public async Task<List<Order>> Get() =>
-            await _mongoOrdersService.Get();
+            await _ordersService.Get();
 
         [HttpGet("{id:length(24)}")]
         public async Task<ActionResult<Order>> Get(string id)
         {
-            var order = await _mongoOrdersService.Get(id);
+            var order = await _ordersService.Get(id);
 
             if (order is null)
             {
@@ -35,7 +36,7 @@ namespace VattaAppApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Order newOrder)
         {
-            await _mongoOrdersService.Create(newOrder);
+            await _ordersService.Create(newOrder);
 
             return CreatedAtAction(nameof(Get), new { id = newOrder.Id }, newOrder);
         }
@@ -43,7 +44,7 @@ namespace VattaAppApi.Controllers
         [HttpPut("{id:length(24)}")]
         public async Task<IActionResult> Update(string id, Order updateOrder)
         {
-            var order = await _mongoOrdersService.Get(id);
+            var order = await _ordersService.Get(id);
 
             if (order is null)
             {
@@ -52,7 +53,7 @@ namespace VattaAppApi.Controllers
 
             updateOrder.Id = order.Id;
 
-            await _mongoOrdersService.Update(id, updateOrder);
+            await _ordersService.Update(id, updateOrder);
 
             return NoContent();
         }
@@ -60,14 +61,14 @@ namespace VattaAppApi.Controllers
         [HttpDelete("{id:length(24)}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var order = await _mongoOrdersService.Get(id);
+            var order = await _ordersService.Get(id);
 
             if (order is null)
             {
                 return NotFound();
             }
 
-            await _mongoOrdersService.Remove(id);
+            await _ordersService.Remove(id);
 
             return NoContent();
         }

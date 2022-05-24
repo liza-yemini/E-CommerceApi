@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VattaAppApi.Models;
 using VattaAppApi.Services;
+using VattaAppApi.Services.Interfaces;
 
 namespace VattaAppApi.Controllers
 {
@@ -8,21 +9,21 @@ namespace VattaAppApi.Controllers
     [Route("api/[controller]")]
     public class SellersController : ControllerBase
     {
-        private readonly MongoSellersService _mongoSellersService;
+        private readonly ISellersService _sellersService;
 
-        public SellersController(MongoSellersService mongoSellersService)
+        public SellersController(ISellersService sellersService)
         {
-            _mongoSellersService = mongoSellersService;
+            _sellersService = sellersService;
         }
 
         [HttpGet]
         public async Task<List<Seller>> Get() =>
-            await _mongoSellersService.Get();
+            await _sellersService.Get();
 
         [HttpGet("{id:length(24)}")]
         public async Task<ActionResult<Seller>> Get(string id)
         {
-            var seller = await _mongoSellersService.Get(id);
+            var seller = await _sellersService.Get(id);
 
             if (seller is null)
             {
@@ -52,7 +53,7 @@ namespace VattaAppApi.Controllers
 
                 newSeller.Age = age;
             }
-            await _mongoSellersService.Create(newSeller);
+            await _sellersService.Create(newSeller);
 
             return CreatedAtAction(nameof(Get), new { id = newSeller.Id }, newSeller);
         }
@@ -60,7 +61,7 @@ namespace VattaAppApi.Controllers
         [HttpPut("{id:length(24)}")]
         public async Task<IActionResult> Update(string id, Seller updateSeller)
         {
-            var seller = await _mongoSellersService.Get(id);
+            var seller = await _sellersService.Get(id);
 
             if (seller is null)
             {
@@ -69,7 +70,7 @@ namespace VattaAppApi.Controllers
 
             updateSeller.Id = seller.Id;
 
-            await _mongoSellersService.Update(id, updateSeller);
+            await _sellersService.Update(id, updateSeller);
 
             return NoContent();
         }
@@ -77,14 +78,14 @@ namespace VattaAppApi.Controllers
         [HttpDelete("{id:length(24)}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var seller = await _mongoSellersService.Get(id);
+            var seller = await _sellersService.Get(id);
 
             if (seller is null)
             {
                 return NotFound();
             }
 
-            await _mongoSellersService.Remove(id);
+            await _sellersService.Remove(id);
 
             return NoContent();
         }
